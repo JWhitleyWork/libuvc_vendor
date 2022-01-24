@@ -18,38 +18,24 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 
-set(libuvc_DESTDIR ${CMAKE_CURRENT_BINARY_DIR}/libuvc_install)
-
 include(ExternalProject)
 externalproject_add(libuvc_project
   GIT_REPOSITORY https://github.com/libuvc/libuvc
   GIT_TAG v0.0.6
   GIT_SHALLOW TRUE
   BUILD_IN_SOURCE TRUE
-  INSTALL_DIR ${libuvc_DESTDIR}
+  INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
   CONFIGURE_COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+  STEP_TARGETS build
 )
 
-find_library(libuvc_PATH libuvc.so
-  HINTS ${libuvc_DESTDIR}/lib
-  REQUIRED
-)
+externalproject_get_property(libuvc_project SOURCE_DIR)
 
 add_library(libuvc SHARED IMPORTED)
-set_property(TARGET libuvc PROPERTY
-  IMPORTED_LOCATION ${libuvc_PATH})
-add_dependencies(libuvc libuvc_project)
-
-ament_export_include_directories(include)
-ament_export_libraries(libuvc)
-
-install(DIRECTORY ${libuvc_DESTDIR}/include/
-  DESTINATION include
+set_target_properties(libuvc PROPERTIES
+  IMPORTED_LOCATION "${CMAKE_INSTALL_PREFIX}/lib/libuvc.so"
 )
-
-install(DIRECTORY ${libuvc_DESTDIR}/lib/
-  DESTINATION lib
-)
+add_dependencies(libuvc libuvc_project-build)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -57,3 +43,10 @@ if(BUILD_TESTING)
 endif()
 
 ament_package()
+
+# Fix installation location and permissions
+install(DIRECTORY ${SOURCE_DIR}/
+  DESTINATION lib
+  USE_SOURCE_PERMISSIONS
+  FILES_MATCHING PATTERN "*.so"
+)
