@@ -21,7 +21,7 @@ find_package(ament_cmake REQUIRED)
 include(ExternalProject)
 externalproject_add(libuvc_project
   GIT_REPOSITORY https://github.com/libuvc/libuvc
-  GIT_TAG v0.0.6
+  GIT_TAG 37f00abd32b083a3d748f2a25c1c794578b51c16
   GIT_SHALLOW TRUE
   BUILD_IN_SOURCE TRUE
   INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
